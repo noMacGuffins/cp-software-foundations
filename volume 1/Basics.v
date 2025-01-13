@@ -338,4 +338,136 @@ Example test_ltb3: (ltb 4 2) = false.
 Proof. simpl. reflexivity. Qed.
 (* Exercise end *)
 
+(* proof by simplication *)
+(* ∀ in the html => forall in coq
+actually dont need simpl, reflexivity does the work *)
+Theorem plus_O_n' : forall n : nat, 0 + n = n.
+Proof.
+  intros n. reflexivity. Qed.
+(* variable does not have to match when moving from quantifier to the context *)
+Theorem plus_O_n'' : forall n : nat, 0 + n = n.
+Proof.
+  intros m. reflexivity. Qed.
 
+(* similarly *)
+Theorem plus_1_l : forall n:nat, 1 + n = S n.
+Proof.
+  intros n. reflexivity. Qed.
+Theorem mult_0_l : forall n:nat, 0 * n = 0.
+Proof.
+  intros n. reflexivity. Qed.
+
+(* proof by rewriting *)
+Theorem plus_id_example : forall n m:nat,
+  n = m ->
+  n + n = m + m.
+Proof.
+  (* move both quantifiers into the context: *)
+  intros n m.
+  (* move the hypothesis into the context: *)
+  intros H.
+  (* rewrite the goal using the hypothesis: *)
+  rewrite -> H.
+  reflexivity. Qed.
+
+(* Exercise: plus id *)
+Theorem plus_id_exercise : forall n m o : nat,
+  n = m -> 
+  m = o -> 
+  n + m = m + o.
+Proof.
+  intros n m o.
+  intros H1.
+  intros H2.
+  rewrite -> H1.
+  rewrite -> H2. 
+  reflexivity. Qed.
+(* Exercise end *)
+
+(* using previously proven theorems *)
+Theorem mult_n_0_m_0 : forall p q : nat,
+  (p *0) + (q * 0) = 0.
+Proof.
+  intros p q.
+  rewrite <- mult_n_O.
+  rewrite <- mult_n_O.
+  reflexivity. Qed.
+
+Check mult_n_O.
+(* Exercise  *)
+Theorem mult_n_1 : forall p : nat,
+  p * 1 = p.
+Proof.
+  intros p.
+  rewrite <- mult_n_Sm.
+  rewrite <- mult_n_O.
+  reflexivity. Qed.
+
+(* proof by case analysis: basically match within a proof *)
+Theorem plus_1_neq_0 : forall n : nat,
+  (n + 1) =? 0 = false.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - reflexivity.
+  - reflexivity. Qed.
+
+(* curly braces also possible to separate subgoals *)
+Theorem andb3_exchange :
+  forall b c d, andb (andb b c) d = andb (andb b d) c.
+Proof.
+  intros b c d. destruct b eqn:Eb.
+  - destruct c eqn:Ec.
+    { destruct d eqn:Ed.
+      - reflexivity.
+      - reflexivity. }
+    { destruct d eqn:Ed.
+      - reflexivity.
+      - reflexivity. }
+  - destruct c eqn:Ec.
+    { destruct d eqn:Ed.
+      - reflexivity.
+      - reflexivity. }
+    { destruct d eqn:Ed.
+      - reflexivity.
+      - reflexivity. }
+Qed.
+
+(* Exercise: andb_true_elim2 *)
+Theorem andb_true_elim2 : forall b c : bool,
+  andb b c = true -> c = true.
+Proof.
+  intros b c.
+  destruct b eqn: Eb.
+  {
+    simpl.
+    intros H.
+    rewrite -> H.
+    reflexivity.
+  }
+  {
+    simpl.
+    intros H.
+    destruct c.
+    - reflexivity.
+    - rewrite <- H.
+    reflexivity.
+  }
+Qed.
+
+(* shorthand *)
+Theorem plus_1_neq_0' : forall n : nat,
+  (n + 1) =? 0 = false.
+Proof.
+  intros [|n].
+  - reflexivity.
+  - reflexivity. Qed.
+
+Theorem andb_commutative'' :
+  forall b c, andb b c = andb c b.
+Proof.
+  intros [] [].
+  - reflexivity.
+  - reflexivity.
+  - reflexivity.
+  - reflexivity.
+Qed.
