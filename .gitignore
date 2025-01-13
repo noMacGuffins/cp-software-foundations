@@ -5,4 +5,4 @@
 *.glob
 *.conf
 Makefile.coq
-Makefile.d
+.Makefile.d
