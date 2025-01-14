@@ -14,6 +14,7 @@
 5. Open project directory and run!
 
 # Build and Testing
+1. Open the directory of the volume to work on in vscode (do not open the root directory or else vscoq will not recognize each variables... Its fine if you'll only be using the terminal.)
 1. Clean the directory
     ~~~
     make clean
@@ -24,3 +25,4 @@
     make
     ~~~
 4. Check console for grades and comments.
+

@@ -1,7 +1,6 @@
 Set Warnings "-notation-overridden,-parsing".
 From Coq Require Export String.
-Require Import Basics.
-
+From LF Require Import Basics.
 Parameter MISSING: Type.
 
 Module Check.
@@ -27,7 +26,7 @@ Ltac print_manual_grade A :=
 
 End Check.
 
-Require Import Basics.
+From LF Require Import Basics.
 Import Check.
 
 Goal True.
