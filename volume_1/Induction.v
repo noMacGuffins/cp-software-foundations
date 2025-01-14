@@ -51,18 +51,12 @@ Proof.
   induction n as [| n' IHn'].
   - reflexivity.
   - simpl. rewrite IHn'. reflexivity. Qed.
-Theorem plus_n_0 : forall n : nat, n + 0 = n.
-Proof.
-  induction n.
-  - reflexivity.
-  - simpl. rewrite IHn. reflexivity. 
-Qed.
 Theorem add_comm : forall n m : nat,
   n + m = m + n.
 Proof.
   intros n m.
   induction n as [| n' IHn'].
-  - simpl. rewrite -> plus_n_0. reflexivity.
+  - simpl. rewrite -> add_0_r. reflexivity.
   - simpl. rewrite -> IHn'. rewrite -> plus_n_Sm. reflexivity. Qed.
 Theorem add_assoc : forall n m p : nat,
   n + (m + p) = (n + m) + p.
@@ -109,6 +103,7 @@ Proof.
   induction n as [| n' IHn'].
   - reflexivity.
   - rewrite -> IHn'. rewrite -> negb_involutive.
+Qed
 (* Exercise end *)
   
 (* Proofs within Proofs *)
@@ -239,7 +234,121 @@ Proof.
       rewrite -> add_assoc.
       reflexivity.
   }
+Qed.
 (* Exercise end *)
 
+(* Exercise: plus_leb_compat_l *)
+Theorem plus_leb_compat_l : forall n m p : nat,
+  n <=? m = true -> (p + n) <=? (p + m) = true.
+Proof.
+  intros n m p IHn.
+  induction p.
+  - simpl. rewrite -> IHn. reflexivity.
+  - simpl. rewrite -> IHp. reflexivity.
+Qed.
+(* Exercise end *)
 
+(* Exercise: more exercises *)
+Theorem leb_refl : forall n:nat,
+  (n <=? n) = true.
+Proof.
+  intros n.
+  induction n.
+  - reflexivity.
+  - simpl. rewrite -> IHn. reflexivity.
+  Qed.
+Theorem zero_neqb_S : forall n:nat,
+  0 =? (S n) = false.
+Proof.
+  intros. 
+  destruct n.
+  - reflexivity.
+  - reflexivity. 
+  Qed.
+Theorem andb_false_r : forall b : bool,
+  andb b false = false.
+Proof.
+  intros b.
+  destruct b.
+  - reflexivity.
+  - reflexivity.
+  Qed.
+Theorem S_neqb_0 : forall n:nat,
+  (S n) =? 0 = false.
+Proof.
+  simpl. reflexivity. Qed.
+Theorem mult_1_l : forall n:nat, 1 * n = n.
+Proof.
+  intros n. simpl. rewrite -> add_0_r. reflexivity. Qed.
+Theorem all3_spec : forall b c : bool,
+  orb
+    (andb b c)
+    (orb (negb b)
+         (negb c))
+  = true.
+Proof.
+  intros b c.
+  destruct b, c.
+  - reflexivity.
+  - reflexivity.
+  - reflexivity.
+  - reflexivity.
+Qed.
+Theorem mult_plus_distr_r : forall n m p : nat,
+  (n + m) * p = (n * p) + (m * p).
+Proof.
+  intros n m p. 
+  induction p.
+  {
+    rewrite -> mul_0_r. 
+    rewrite -> mul_0_r. 
+    rewrite -> mul_0_r.
+    reflexivity.
+  }
+  {
+    rewrite <- mult_n_Sm.
+    rewrite <- mult_n_Sm.
+    rewrite <- mult_n_Sm.
+    rewrite -> IHp.
+    assert (H1: n * p + m * p + (n + m) = n * p + (m * p + (n + m))).
+    { rewrite <- add_assoc. reflexivity. }
+    rewrite -> H1.
+    assert (H2: n * p + n + (m * p + m) = n * p + (n + (m * p + m))).
+    { rewrite <- add_assoc. reflexivity. }
+    rewrite -> H2.
+    assert (H3: n + (m * p + m) = n + m * p + m).
+    { rewrite <- add_assoc. reflexivity. }
+    rewrite -> H3.
+    assert (H4: n + m * p = m * p + n).
+    { rewrite -> add_comm. reflexivity. }
+    rewrite -> H4.
+    rewrite -> add_assoc.
+    rewrite -> add_assoc.
+    rewrite -> add_assoc.
+    rewrite -> add_assoc.
+    reflexivity.
+  }
+Qed.
+Theorem mult_assoc : forall n m p : nat,
+  n * (m * p) = (n * m) * p.
+Proof.
+  intros n m p.
+  induction n.
+  - reflexivity.
+  - simpl. rewrite -> IHn. rewrite <- mult_plus_distr_r. reflexivity.
+  Qed.
 
+(* Exercise end *)
+
+(* Exercise: add_shuffle3' *)
+Theorem add_shuffle3' : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p.
+  rewrite -> add_assoc.
+  rewrite -> add_assoc.
+  replace (n + m) with (m + n). reflexivity.
+  rewrite -> add_comm.
+  reflexivity.
+  Qed.
+(* Exercise end *)
