@@ -1,6 +1,6 @@
 Set Warnings "-notation-overridden,-parsing".
 From Coq Require Export String.
-From volume_1 Require Import Induction.
+From LF Require Import Induction.
 
 Parameter MISSING: Type.
 
@@ -27,7 +27,7 @@ Ltac print_manual_grade A :=
 
 End Check.
 
-From volume_1 Require Import Induction.
+From LF Require Import Induction.
 Import Check.
 
 Goal True.
