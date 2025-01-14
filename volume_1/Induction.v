@@ -51,12 +51,18 @@ Proof.
   induction n as [| n' IHn'].
   - reflexivity.
   - simpl. rewrite IHn'. reflexivity. Qed.
+Theorem plus_n_0 : forall n : nat, n + 0 = n.
+Proof.
+  induction n.
+  - reflexivity.
+  - simpl. rewrite IHn. reflexivity. 
+Qed.
 Theorem add_comm : forall n m : nat,
   n + m = m + n.
 Proof.
   intros n m.
   induction n as [| n' IHn'].
-  - simpl. rewrite <- plus_n_O. reflexivity.
+  - simpl. rewrite -> plus_n_0. reflexivity.
   - simpl. rewrite -> IHn'. rewrite -> plus_n_Sm. reflexivity. Qed.
 Theorem add_assoc : forall n m p : nat,
   n + (m + p) = (n + m) + p.
@@ -180,6 +186,7 @@ Proof.
   induction n as [| n' IHn'].
   - reflexivity.
   - simpl. rewrite <- IHn'. reflexivity.
+Qed.
 (* 
 Theorem: (n =? n) = true for any n.
 Proof: 
@@ -195,6 +202,44 @@ Immediate from the induction hypothesis,
         true = true.
  *)
 (* Do not modify the following line: *)
-Definition manual_grade_for_eqb_refl_informal : option (nat×string) := None.
+Definition manual_grade_for_eqb_refl_informal : option (nat*string) := None.
 (* Exercise end *)
+
+(* Exercise: mul_comm *)
+Theorem add_shuffle3 : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p.
+  rewrite -> add_assoc.
+  rewrite -> add_assoc.
+  assert (H: n + m = m + n).
+  { rewrite add_comm. reflexivity. }
+  rewrite -> H.
+  reflexivity.
+Qed.
+
+Theorem mul_comm : forall m n : nat,
+  m * n = n * m.
+Proof.
+  intros m n.
+  induction m.
+  {
+    induction n.
+    - reflexivity.
+    - simpl. rewrite <- IHn. reflexivity.
+  }
+  {
+    induction n.
+    - simpl. rewrite -> IHm. reflexivity.
+    - simpl. 
+      rewrite -> IHm. 
+      simpl.
+      rewrite <- mult_n_Sm.
+      rewrite -> add_comm.
+      rewrite -> add_assoc.
+      reflexivity.
+  }
+(* Exercise end *)
+
+
 
