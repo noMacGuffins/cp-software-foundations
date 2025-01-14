@@ -102,8 +102,8 @@ Proof.
   intros n.
   induction n as [| n' IHn'].
   - reflexivity.
-  - rewrite -> IHn'. rewrite -> negb_involutive.
-Qed
+  - rewrite -> IHn'. rewrite -> negb_involutive. reflexivity.
+Qed.
 (* Exercise end *)
   
 (* Proofs within Proofs *)
@@ -352,3 +352,85 @@ Proof.
   reflexivity.
   Qed.
 (* Exercise end *)
+
+(* Nat back to Bin and Back to Nat *)
+Fixpoint incr (m:bin) : bin :=
+  match m with
+    | Z => B1 (Z)
+    | B0 (n) => B1 (n)
+    | B1 (n) => B0 (incr (n))
+  end.
+Fixpoint bin_to_nat (m:bin) : nat :=
+  match m with
+    | B0 (n) => 2 * bin_to_nat(n)
+    | B1 (n) => 1 + 2 * bin_to_nat(n)
+    | Z => 0
+  end.
+
+(* Exercise: binary_commute *)
+Theorem bin_to_nat_pres_incr : forall b : bin,
+  bin_to_nat (incr b) = 1 + bin_to_nat b.
+Proof.
+  simpl.
+  intros b.
+  induction b.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHb. simpl. rewrite <- plus_n_Sm. reflexivity.
+Qed.
+(* Exercise end *)
+
+(* Exercise: nat_to_bin *)
+Fixpoint nat_to_bin (n:nat) : bin :=
+  match n with
+    | 0 => Z
+    | S(n') => incr(nat_to_bin(n'))
+  end.
+  
+Theorem nat_bin_nat : forall n, bin_to_nat (nat_to_bin n) = n.
+Proof.
+  intros n.
+  induction n.
+  - reflexivity.
+  - simpl.
+    rewrite -> bin_to_nat_pres_incr.
+    rewrite -> IHn.
+    reflexivity.
+Qed.
+(* Exercise end *)
+
+(* Bin to Nat and back *)
+Theorem bin_nat_bin_fails : forall b, nat_to_bin (bin_to_nat b) = b.
+Abort.
+
+(* Exercise: double_bin *)
+Lemma double_incr : forall n : nat, double (S n) = S (S (double n)).
+Proof.
+  destruct n.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+Definition double_bin (b:bin) : bin := 
+  match b with
+    | Z => Z
+    | n => B0 n
+  end.
+
+Example double_bin_zero : double_bin Z = Z.
+Proof. reflexivity.  Qed.
+
+Lemma double_incr_bin : forall b,
+    double_bin (incr b) = incr (incr (double_bin b)).
+Proof.
+  induction b.
+  - reflexivity.
+  - reflexivity.
+  - reflexivity.
+Qed.
+(* Exercise end *)
+
+(* Exercise: bin_nat_bin *)
+
+(* Exercise end *)
+
