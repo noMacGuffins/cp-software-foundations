@@ -408,7 +408,7 @@ Lemma double_incr : forall n : nat, double (S n) = S (S (double n)).
 Proof.
   destruct n.
   - reflexivity.
-  - reflexivity.
+  - simpl. reflexivity.
 Qed.
 
 Definition double_bin (b:bin) : bin := 
@@ -428,9 +428,73 @@ Proof.
   - reflexivity.
   - reflexivity.
 Qed.
+Theorem bin_nat_bin_fails : forall b, nat_to_bin (bin_to_nat b) = b.
+Abort.
+(* The length of bin could be different from the original as 
+000000 in bin is also a representation of 0 in nat as is 00.
+Thus, bin_nat_bin_fails could fail in that case as these two 
+representations are not strictly equal in coq *)
 (* Exercise end *)
 
 (* Exercise: bin_nat_bin *)
+Fixpoint normalize (b:bin) : bin :=
+  match b with 
+    | Z => Z
+    | B0 b' => double_bin(normalize b')
+    | B1 b' => incr(double_bin(normalize b'))
+  end.
+Example test_normalize_0 : normalize Z = Z.
+Proof. reflexivity. Qed.
+Example test_normalize_1 : normalize (B0 (B0 (B0 Z))) = Z.
+Proof. reflexivity. Qed.
+Example test_normalize_2 : normalize (B1 (B0 (B0 Z))) = (B1 (Z)).
+Proof. reflexivity. Qed.
+Example test_normalize_3 : normalize (B0 (B1 (B0 (B0 Z)))) = B0 (B1 (Z)).
+Proof. reflexivity. Qed.
 
+Theorem nat_to_bin_double : forall n : nat,
+  nat_to_bin(double n) = double_bin(nat_to_bin n).
+Proof.
+  intros n.
+  induction n.
+  - reflexivity.
+  - simpl. rewrite -> double_incr_bin. rewrite <- IHn. reflexivity.
+Qed.
+
+Theorem bin_nat_bin : forall b, nat_to_bin (bin_to_nat b) = normalize b.
+Proof.
+  intros b.
+  induction b.
+  {
+    reflexivity.
+  }
+  {
+    simpl.
+    destruct (bin_to_nat b).
+    {
+      simpl. 
+      rewrite <- IHb. 
+      simpl. 
+      reflexivity.
+    }
+    {
+      rewrite -> add_0_r. 
+      rewrite <- double_plus. 
+      rewrite -> nat_to_bin_double. 
+      rewrite -> IHb.
+      reflexivity.
+    }
+  }
+  {
+    simpl.
+    rewrite <- IHb.
+    rewrite -> add_0_r. 
+    rewrite <- double_plus. 
+    rewrite -> nat_to_bin_double.
+    reflexivity. 
+  }
+Qed.
 (* Exercise end *)
+
+
 
