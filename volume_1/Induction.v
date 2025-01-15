@@ -1,6 +1,4 @@
 From LF Require Import Basics.
-
-Print Basics.
 (* Proof by Induction *)
 
 (* try with reflexivity *)
@@ -93,6 +91,7 @@ Proof.
   induction n as [| n' IHn'].
   - reflexivity.
   - simpl. rewrite <- IHn'. reflexivity.
+Qed.
 (* Exercise end *)
 
 (* Exercise: even_S *)
@@ -174,14 +173,6 @@ Definition manual_grade_for_add_comm_informal : option (nat*string) := None.
 (* Exercise end *)
 
 (* Exercise: eqb_refl_informal*)
-Theorem eqb_refl : forall n : nat,
-  (n =? n) = true.
-Proof.
-  intros n.
-  induction n as [| n' IHn'].
-  - reflexivity.
-  - simpl. rewrite <- IHn'. reflexivity.
-Qed.
 (* 
 Theorem: (n =? n) = true for any n.
 Proof: 

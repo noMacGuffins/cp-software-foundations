@@ -28,6 +28,7 @@ Ltac print_manual_grade A :=
 End Check.
 
 From LF Require Import Induction.
+From LF Require Import Basics.
 Import Check.
 
 Goal True.
