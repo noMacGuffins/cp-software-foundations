@@ -290,6 +290,14 @@ Proof. reflexivity. Qed.
 (* Exercise end *)
 
 
-
+(* Exercise: add_inc_count *)
+Theorem add_inc_count : forall (v: nat) (l: bag), count v (add v l) = (count v l) + 1.
+Proof.
+  intros.
+  induction v ,l.
+  - reflexivity.
+  - simpl.
+Qed.
+(* Exercise end *)
 
 
