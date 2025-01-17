@@ -1,4 +1,4 @@
-From LF Require Import Basics.
+From LF Require Export Basics.
 (* Proof by Induction *)
 
 (* try with reflexivity *)

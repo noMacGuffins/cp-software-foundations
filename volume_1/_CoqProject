@@ -1,7 +1,8 @@
 -Q . LF
--R . LF
 
 Basics.v
 BasicsTest.v
 Induction.v
 InductionTest.v
+Lists.v
+ListsTest.v
