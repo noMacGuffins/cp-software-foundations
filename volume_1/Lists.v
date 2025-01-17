@@ -291,12 +291,31 @@ Proof. reflexivity. Qed.
 
 
 (* Exercise: add_inc_count *)
-Theorem add_inc_count : forall (v: nat) (l: bag), count v (add v l) = (count v l) + 1.
+Lemma add_nil: forall n, add n [] = [n].
+Proof.
+  reflexivity.
+Qed.
+Lemma count_n: forall n, count n [n] = 1.
+Proof.
+  intros n.
+  induction n.
+  - simpl. reflexivity.
+  - simpl in IHn. simpl. assumption.
+Qed.
+Theorem add_inc_count : forall (v: nat) (l: bag), count v (add v l) = S (count v l).
 Proof.
   intros.
-  induction v ,l.
+  (* destruct (v =? v) eqn:Ev.
   - reflexivity.
-  - simpl.
+  - simpl.  *)
+  destruct l as [|h t].
+  - rewrite -> add_nil. rewrite -> count_n. simpl. reflexivity.
+  - simpl. 
+    replace (v =? v) with true. 
+    reflexivity.
+    induction v as [| n' IHn'].
+    + reflexivity.
+    + simpl. rewrite <- IHn'. reflexivity.
 Qed.
 (* Exercise end *)
 
