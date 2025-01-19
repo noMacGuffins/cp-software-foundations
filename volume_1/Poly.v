@@ -73,3 +73,112 @@ End MumbleGrumble.
 (* Exercise end *)
 
 
+(* Type Annotation Inference *)
+
+Fixpoint repeat' X x count : list X :=
+  match count with
+  | 0 => nil X
+  | S count' => cons X x (repeat' X x count')
+  end.
+
+Check repeat'
+  : forall X : Type, X -> nat -> list X.
+Check repeat
+  : forall X : Type, X -> nat -> list X.
+(* repeat' has exactly the same type as repeat; coq used type inference to 
+deduce the types of X x and count *)
+
+
+(* Type Argument Inference with Holes *)
+
+Fixpoint repeat'' X x count : list X :=
+  match count with
+  | 0 => nil _
+  | S count' => cons _ x (repeat'' _ x count')
+  end.
+Definition list123 :=
+  cons nat 1 (cons nat 2 (cons nat 3 (nil nat))).
+Definition list123' :=
+  cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
+
+
+(* Implicit Arguments *)
+
+Arguments nil {X}.
+Arguments cons {X}.
+Arguments repeat {X}.
+Fixpoint repeat''' {X : Type} (x : X) (count : nat) : list X :=
+  match count with
+  | 0 => nil
+  | S count' => cons x (repeat''' x count')
+  end.
+
+Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
+
+(* marking the parameter of an inductive type as implicit causes it to 
+become implicit for the type itself, not just for its constructors  *)
+Inductive list' {X:Type} : Type :=
+  | nil'
+  | cons' (x : X) (l : list').
+
+
+Fixpoint app {X : Type} (l1 l2 : list X) : list X :=
+  match l1 with
+  | nil => l2
+  | cons h t => cons h (app t l2)
+  end.
+Fixpoint rev {X:Type} (l:list X) : list X :=
+  match l with
+  | nil => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+Example test_rev1 :
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
+
+(* Supplying Arguments Explicitly *)
+Fail Definition mynil := nil.
+Definition mynil : list nat := nil.
+Check @nil : forall X : Type, list X.
+Definition mynil' := @nil nat.
+(* force explicit *)
+Check @nil : forall X : Type, list X.
+Definition mynil' := @nil nat.
+
+(* Since we have made the constructor type arguments implicit, 
+Coq will know to automatically infer these when we use the notations. *)
+Notation "x :: y" := (cons x y)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
+Notation "x ++ y" := (app x y)
+                     (at level 60, right associativity).
+
+Definition list123''' := [1; 2; 3].
+
+
+(* poly_exercises *)
+Theorem app_nil_r : forall (X:Type), forall l:list X,
+  l ++ [] = l.
+Proof.
+  (* FILL IN HERE *) Admitted.
+Theorem app_assoc : forall A (l m n:list A),
+  l ++ m ++ n = (l ++ m) ++ n.
+Proof.
+  (* FILL IN HERE *) Admitted.
+Lemma app_length : forall (X:Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  (* FILL IN HERE *) Admitted.
+(* Exercise end *)
+
