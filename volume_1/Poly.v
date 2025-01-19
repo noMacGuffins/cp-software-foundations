@@ -149,8 +149,6 @@ Proof. reflexivity. Qed.
 (* Supplying Arguments Explicitly *)
 Fail Definition mynil := nil.
 Definition mynil : list nat := nil.
-Check @nil : forall X : Type, list X.
-Definition mynil' := @nil nat.
 (* force explicit *)
 Check @nil : forall X : Type, list X.
 Definition mynil' := @nil nat.
@@ -171,14 +169,50 @@ Definition list123''' := [1; 2; 3].
 Theorem app_nil_r : forall (X:Type), forall l:list X,
   l ++ [] = l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction l as [| n l' IHl'].
+  - reflexivity.
+  - simpl. rewrite -> IHl'. reflexivity.
+Qed.
 Theorem app_assoc : forall A (l m n:list A),
   l ++ m ++ n = (l ++ m) ++ n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction l as [| n' l' IHl'].
+  - reflexivity.
+  - simpl. rewrite -> IHl'. reflexivity.
+Qed.
 Lemma app_length : forall (X:Type) (l1 l2 : list X),
   length (l1 ++ l2) = length l1 + length l2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction l1 as [| n l1' IHl1'].
+    - reflexivity.
+    - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
 (* Exercise end *)
+
+(* Exercise: more_poly_exercises *)
+Theorem rev_app_distr: forall X (l1 l2 : list X),
+  rev (l1 ++ l2) = rev l2 ++ rev l1.
+Proof.
+    intros.
+    induction l1 as [| n l1' IHl1'].
+    - simpl. rewrite -> app_nil_r. reflexivity.
+    - simpl. rewrite -> IHl1'. rewrite -> app_assoc. reflexivity.
+Qed.
+Theorem rev_involutive : forall X : Type, forall l : list X,
+  rev (rev l) = l.
+Proof.
+    intros.
+    induction l as [| n l' IHl'].
+    - reflexivity.
+    - simpl. rewrite -> rev_app_distr. rewrite -> IHl'. simpl. reflexivity.
+(* Exercise end *)
+
+
+
+
+
+
 
