@@ -208,11 +208,247 @@ Proof.
     induction l as [| n l' IHl'].
     - reflexivity.
     - simpl. rewrite -> rev_app_distr. rewrite -> IHl'. simpl. reflexivity.
+Qed.
 (* Exercise end *)
 
 
+(* Polymorphic Pairs *)
+
+Inductive prod (X Y : Type) : Type :=
+| pair (x : X) (y : Y).
+Arguments pair {X} {Y}.
+
+Notation "( x , y )" := (pair x y).
+Notation "X * Y" := (prod X Y) : type_scope.
+(* he annotation : type_scope tells Coq that this abbreviation should only be used 
+when parsing types, not when parsing expressions. 
+This avoids a clash with the multiplication symbol. *)
+
+Definition fst {X Y : Type} (p : X * Y) : X :=
+  match p with
+  | (x, y) => x
+  end.
+Definition snd {X Y : Type} (p : X * Y) : Y :=
+  match p with
+  | (x, y) => y
+  end.
+Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
+           : list (X*Y) :=
+  match lx, ly with
+  | [], _ => []
+  | _, [] => []
+  | x :: tx, y :: ty => (x, y) :: (combine tx ty)
+  end.
 
 
+(* Exercise: combine_checks *)
+(* Type of combine is 
+forall X Y: Type, list X -> list Y -> list (X * Y) *)
+Check @combine.
+(* [(1, false), (2, false)] *)
+Compute (combine [1;2] [false;false;true;true]).
+(* Exercise end *)
 
+(* Exercise: split *)
+Fixpoint split {X Y : Type} (l : list (X*Y)) : (list X) * (list Y) := 
+    match l with
+        | [] => ([], [])
+        | (x, y) :: t => match split t with
+                        | (lx, ly) => (x :: lx, y :: ly)
+                        end
+    end.
+Example test_split:
+  split [(1,false);(2,false)] = ([1;2],[false;false]).
+Proof.
+reflexivity.
+Qed.
+(* Exercise end *)
+
+(* Polymorphic Options *)
+Module OptionPlayground.
+Inductive option (X:Type) : Type :=
+  | Some (x : X)
+  | None.
+Arguments Some {X}.
+Arguments None {X}.
+End OptionPlayground.
+Fixpoint nth_error {X : Type} (l : list X) (n : nat)
+                   : option X :=
+  match l with
+  | nil => None
+  | a :: l' => match n with
+               | O => Some a
+               | S n' => nth_error l' n'
+               end
+  end.
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+Proof. reflexivity. Qed.
+Example test_nth_error2 : nth_error [[1];[2]] 1 = Some [2].
+Proof. reflexivity. Qed.
+Example test_nth_error3 : nth_error [true] 2 = None.
+Proof. reflexivity. Qed.
+
+
+(* Exercise: hd_error_poly *)
+Definition hd_error {X : Type} (l : list X) : option X :=
+    match l with
+        | [] => None
+        | h :: t => Some h
+    end.
+
+Check @hd_error : forall X : Type, list X -> option X.
+
+Example test_hd_error1 : hd_error [1;2] = Some 1.
+Proof. reflexivity. Qed.
+
+Example test_hd_error2 : hd_error [[1];[2]] = Some [1].
+Proof. reflexivity. Qed.
+(* Exercise end *)
+
+
+(* Functions as Data *)
+
+(* High order functions: functions that manipulate other functions *)
+Definition doit3times {X : Type} (f : X->X) (n : X) : X :=
+  f (f (f n)).
+Check @doit3times : forall X : Type, (X -> X) -> X -> X.
+Example test_doit3times: doit3times minustwo 9 = 3.
+Proof. reflexivity. Qed.
+
+Example test_doit3times': doit3times negb true = false.
+Proof. reflexivity. Qed.
+
+
+(* Filter *)
+Fixpoint filter {X:Type} (test: X -> bool) (l:list X) : list X :=
+  match l with
+  | [] => []
+  | h :: t =>
+    if test h then h :: (filter test t)
+    else filter test t
+  end.
+
+Example test_filter1: filter even [1;2;3;4] = [2;4].
+Proof. reflexivity. Qed.
+
+Definition length_is_1 {X : Type} (l : list X) : bool :=
+  (length l) =? 1.
+Example test_filter2:
+    filter length_is_1
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+Definition countoddmembers' (l:list nat) : nat :=
+  length (filter odd l).
+Example test_countoddmembers'1: countoddmembers' [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'2: countoddmembers' [0;2;4] = 0.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'3: countoddmembers' nil = 0.
+Proof. reflexivity. Qed.
+
+(* Anonymous functions *)
+Example test_anon_fun':
+  doit3times (fun n => n * n) 2 = 256.
+Proof. reflexivity. Qed.
+
+Example test_filter2':
+    filter (fun l => (length l) =? 1)
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+
+(* Exercise: filter_even_gt7 *)
+Definition filter_even_gt7 (l : list nat) : list nat :=
+    filter (fun n => even n && (7 <? n)) l.
+Example test_filter_even_gt7_1 :
+  filter_even_gt7 [1;2;6;9;10;3;12;8] = [10;12;8].
+Proof. reflexivity. Qed.
+Example test_filter_even_gt7_2 :
+  filter_even_gt7 [5;2;6;19;129] = [].
+Proof. reflexivity. Qed.
+(* Exercise end *)
+
+(* Exercise: partition *)
+Definition partition {X : Type} (test : X -> bool) (l : list X) : list X * list X :=
+    (filter test l, filter (fun x => negb (test x)) l).
+
+Example test_partition1: partition odd [1;2;3;4;5] = ([1;3;5], [2;4]).
+Proof. reflexivity. Qed.
+
+Example test_partition2: partition (fun x => false) [5;9;0] = ([], [5;9;0]).
+Proof. reflexivity. Qed.
+(* Exercise end *)
+
+(* Map *)
+Fixpoint map {X Y : Type} (f : X->Y) (l : list X) : list Y :=
+  match l with
+  | [] => []
+  | h :: t => (f h) :: (map f t)
+  end.
+
+Example test_map1: map (fun x => plus 3 x) [2;0;2] = [5;3;5].
+Proof. reflexivity. Qed.
+
+Example test_map2:
+  map odd [2;1;2;5] = [false;true;false;true].
+Proof. reflexivity. Qed.
+
+Example test_map3:
+    map (fun n => [even n;odd n]) [2;1;2;5]
+  = [[true;false];[false;true];[true;false];[false;true]].
+Proof. reflexivity. Qed.
+
+(* Exercise: map_rev *)
+Lemma app_map : forall (X Y : Type) (f : X -> Y) (l : list X) (x : X),
+  app (map f l) [f x] = map f (app l [x]).
+Proof.
+  intros.
+  induction l.
+  - reflexivity.
+  - simpl. rewrite -> IHl. reflexivity.
+Qed.
+Theorem map_rev : forall (X Y : Type) (f : X -> Y) (l : list X),
+  map f (rev l) = rev (map f l).
+Proof.
+    intros.
+    induction l as [| n l' IHl'].
+    - reflexivity.
+    - simpl. rewrite <- IHl'. rewrite -> app_map. reflexivity.
+Qed.
+(* Exercise end *)
+
+(* Exercise: flat_map *)
+Fixpoint flat_map {X Y: Type} (f: X -> list Y) (l: list X): list Y :=
+    match l with
+    | [] => []
+    | h :: t => app (f h) (flat_map f t)
+    end.
+Example test_flat_map1:
+  flat_map (fun n => [n;n;n]) [1;5;4]
+  = [1; 1; 1; 5; 5; 5; 4; 4; 4].
+Proof. 
+    reflexivity.
+Qed.
+(* Exercise end *)
+
+Definition option_map {X Y : Type} (f : X -> Y) (xo : option X)
+                      : option Y :=
+  match xo with
+  | None => None
+  | Some x => Some (f x)
+  end.
+
+(* Exercise: implicit_args *)
+Module ImplicitArgs.
+    Fixpoint flat_map (X Y: Type) (f: X -> Y) (l: list X): list Y :=
+        match l with
+        | [] => []
+        | h :: t => app ([f h]) (flat_map X Y f t)
+        end.
+End ImplicitArgs.
+(* Exercise end *)
 
 
