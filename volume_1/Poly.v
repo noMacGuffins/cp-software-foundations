@@ -451,4 +451,54 @@ Module ImplicitArgs.
 End ImplicitArgs.
 (* Exercise end *)
 
+(* Fold *)
+Fixpoint fold {X Y: Type} (f : X->Y->Y) (l : list X) (b : Y)
+                         : Y :=
+  match l with
+  | nil => b
+  | h :: t => f h (fold f t b)
+  end.
+
+  Check (fold andb) : list bool -> bool -> bool.
+Example fold_example1 :
+  fold andb [true;true;false;true] true = false.
+Proof. reflexivity. Qed.
+
+Example fold_example2 :
+  fold mult [1;2;3;4] 1 = 24.
+Proof. reflexivity. Qed.
+
+Example fold_example3 :
+  fold app [[1];[];[2;3];[4]] [] = [1;2;3;4].
+Proof. reflexivity. Qed.
+
+(* Exercise: fold_types_different *)
+(* Check fold (fun x y => x <=? y) [1;2;3;4] 0 = 10. *)
+(* Exercise end *)
+
+(* Functions That construct functions *)
+Definition constfun {X: Type} (x: X) : nat -> X :=
+  fun (k:nat) => x.
+Definition ftrue := constfun true.
+Example constfun_example1 : ftrue 0 = true.
+Proof. reflexivity. Qed.
+
+Example constfun_example2 : (constfun 5) 99 = 5.
+Proof. reflexivity. Qed.
+
+(* This operator is right-associative, 
+so the type of plus is really a shorthand for nat → (nat → nat) *)
+Check plus : nat -> nat -> nat.
+Definition plus3 := plus 3.
+Check plus3 : nat -> nat.
+Example test_plus3 : plus3 4 = 7.
+Proof. reflexivity. Qed.
+Example test_plus3' : doit3times plus3 0 = 9.
+Proof. reflexivity. Qed.
+Example test_plus3'' : doit3times (plus 3) 0 = 9.
+Proof. reflexivity. Qed.
+
+(* Additional Exercises *)
+
+
 
