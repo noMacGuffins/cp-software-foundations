@@ -487,7 +487,7 @@ Example constfun_example2 : (constfun 5) 99 = 5.
 Proof. reflexivity. Qed.
 
 (* This operator is right-associative, 
-so the type of plus is really a shorthand for nat → (nat → nat) *)
+so the type of plus is really a shorthand for nat -> (nat -> nat) *)
 Check plus : nat -> nat -> nat.
 Definition plus3 := plus 3.
 Check plus3 : nat -> nat.
@@ -499,6 +499,189 @@ Example test_plus3'' : doit3times (plus 3) 0 = 9.
 Proof. reflexivity. Qed.
 
 (* Additional Exercises *)
+
+Module Exercises.
+(* Exercise: fold_length *)
+Definition fold_length {X : Type} (l : list X) : nat :=
+  fold (fun _ n => S n) l 0.
+Example test_fold_length1 : fold_length [4;7;0] = 3.
+Proof. reflexivity. Qed.
+
+Theorem fold_length_correct : forall X (l : list X),
+  fold_length l = length l.
+Proof.
+    intros.
+    induction l.
+    - reflexivity.
+    - simpl. rewrite <- IHl. reflexivity.
+Qed.
+(* Exercise end *)
+
+(* Exercise: fold_map *)
+
+Definition fold_map {X Y: Type} (f: X -> Y) (l: list X): list Y :=
+    fold (fun x t => (f x) :: t) l [].
+
+Example test_fold_map1: fold_map (fun x => x + 1) [1;2;3] = [2;3;4].
+Proof. reflexivity. Qed.
+
+Definition manual_grade_for_fold_map : option (nat*string) := None.
+
+Theorem fold_map_correct : forall X Y (f: X -> Y) (l: list X),
+  fold_map f l = map f l.
+Proof.
+    intros.
+    induction l.
+    - reflexivity.
+    - simpl. rewrite <- IHl. reflexivity.
+Qed.
+(* Exercise end *)
+
+(* Exercise: currying *)
+Definition prod_curry {X Y Z : Type}
+  (f : X * Y -> Z) (x : X) (y : Y) : Z := f (x, y).
+
+Definition prod_uncurry {X Y Z : Type}
+    (f : X -> Y -> Z) (p : X * Y) : Z := f (fst p) (snd p).
+
+Example test_map1': map (plus 3) [2;0;2] = [5;3;5].
+Proof. reflexivity. Qed.
+
+Check @prod_curry.
+Check @prod_uncurry.
+Theorem uncurry_curry : forall (X Y Z : Type)
+                        (f : X -> Y -> Z)
+                        x y,
+  prod_curry (prod_uncurry f) x y = f x y.
+Proof.
+    intros.
+    reflexivity.
+Qed.
+
+Theorem curry_uncurry : forall (X Y Z : Type)
+                        (f : (X * Y) -> Z)
+                        p,
+  prod_uncurry (prod_curry f) p = f p.
+Proof.
+    intros.
+    destruct p.
+    - reflexivity.
+Qed.
+
+
+(* Exercise: nth_error_informal *)
+(* 
+Theorem: For any X, l, and n,
+      nth_error l n = Some x
+    if and only if
+      x is the nth element of l. 
+Proof:
+    Suppose we have a list l of type X and a natural number n.
+    We will prove the theorem by induction on l.
+    - First, suppose l = [].
+        - We must show that nth_error [] n = Some x if and only if x is the nth element of [].
+        - By the definition of nth_error, nth_error [] n = None for any n.
+        - Since there are no elements in [], x cannot be the nth element of [].
+        - Therefore, the theorem holds in this case.
+    - Next, suppose l = h :: t for some h of type X and t of type list X.
+        - We must show that nth_error (h :: t) n = Some x if and only if x is the nth element of h :: t.
+        - By the definition of nth_error, if n = 0, then nth_error (h :: t) n = Some h.
+        - If x is the nth element of h :: t, then x = h.
+        - If n = 0, then x = h is the nth element of h :: t.
+        - If n > 0, then x is the nth element of t.
+        - By the induction hypothesis, nth_error t (n - 1) = Some x if and only if x is the (n - 1)th element of t.
+        - Therefore, the theorem holds in this case.
+    - By induction, the theorem holds for all lists l and natural numbers n.
+*)
+Definition manual_grade_for_informal_proof : option (nat*string) := None.
+(* Exercise end *)
+
+(* Church Numerals *)
+
+Module Church.
+Definition cnat := forall X : Type, (X -> X) -> X -> X.
+
+Definition one : cnat :=
+  fun (X : Type) (f : X -> X) (x : X) => f x.
+
+Definition two : cnat :=
+  fun (X : Type) (f : X -> X) (x : X) => f (f x).
+
+Definition zero : cnat :=
+  fun (X : Type) (f : X -> X) (x : X) => x.
+
+Definition three : cnat := @doit3times.
+
+Definition zero' : cnat :=
+  fun (X : Type) (succ : X -> X) (zero : X) => zero.
+Definition one' : cnat :=
+  fun (X : Type) (succ : X -> X) (zero : X) => succ zero.
+Definition two' : cnat :=
+  fun (X : Type) (succ : X -> X) (zero : X) => succ (succ zero).
+
+Example zero_church_peano : zero nat S O = 0.
+Proof. reflexivity. Qed.
+Example one_church_peano : one nat S O = 1.
+Proof. reflexivity. Qed.
+Example two_church_peano : two nat S O = 2.
+Proof. reflexivity. Qed.
+
+
+(* Exercise: church_scc *)
+
+Definition scc (n : cnat) : cnat :=
+  fun (X : Type) (f : X -> X) (x : X) => f (n X f x).
+
+Example scc_1 : scc zero = one.
+Proof. reflexivity. Qed.
+Example scc_2 : scc one = two.
+Proof. reflexivity. Qed.
+Example scc_3 : scc two = three.
+Proof. reflexivity. Qed.
+
+(* Exercise end *)
+
+
+(* Exercise: church_plus *)
+Definition plus (n m : cnat) : cnat :=
+  fun (X : Type) (f : X -> X) (x : X) => n X f (m X f x).
+Example plus_1 : plus zero one = one.
+Proof. reflexivity. Qed.
+Example plus_2 : plus two three = plus three two.
+Proof. reflexivity. Qed.
+Example plus_3 :
+  plus (plus two two) three = plus one (plus three three).
+Proof. reflexivity. Qed.
+
+(* Exercise end *)
+
+(* Exercise: church_mult *)
+Definition mult (n m : cnat) : cnat
+    := fun (X : Type) (f : X -> X) (x : X) => n X (m X f) x.
+Example mult_1 : mult one one = one.
+Proof. reflexivity. Qed.
+Example mult_2 : mult zero (plus three three) = zero.
+Proof. reflexivity. Qed.
+Example mult_3 : mult two three = plus three three.
+Proof. reflexivity. Qed.
+(* Exercise end *)
+
+(* Exercise: church_exp *)
+Definition exp (n m : cnat) : cnat
+    := fun (X : Type) (f : X -> X) (x : X) => (m (X -> X) (n X) f) x.
+
+Example exp_1 : exp two two = plus two two.
+Proof. reflexivity. Qed.
+Example exp_2 : exp three zero = one.
+Proof. reflexivity. Qed.
+Example exp_3 : exp three two = plus (mult two (mult two two)) one.
+Proof. reflexivity. Qed.
+(* Exercise end *)
+
+End Church.
+
+End Exercises.
+
 
 
 

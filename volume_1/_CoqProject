@@ -6,3 +6,5 @@ Induction.v
 InductionTest.v
 Lists.v
 ListsTest.v
+Poly.v
+PolyTest.v
