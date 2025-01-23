@@ -8,3 +8,7 @@ Lists.v
 ListsTest.v
 Poly.v
 PolyTest.v
+Tactics.v
+TacticsTest.v
+Logic.v
+LogicTest.v

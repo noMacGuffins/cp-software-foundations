@@ -32,18 +32,6 @@ Import Check.
 
 Goal True.
 
-idtac "-------------------  and_exercise  --------------------".
-idtac " ".
-
-idtac "#> and_exercise".
-idtac "Possible points: 2".
-check_type @and_exercise ((forall n m : nat, n + m = 0 -> n = 0 /\ m = 0)).
-idtac "Assumptions:".
-Abort.
-Print Assumptions and_exercise.
-Goal True.
-idtac " ".
-
 idtac "-------------------  and_assoc  --------------------".
 idtac " ".
 
@@ -111,15 +99,6 @@ idtac "Assumptions:".
 Abort.
 Print Assumptions not_both_true_and_false.
 Goal True.
-idtac " ".
-
-idtac "-------------------  informal_not_PNP  --------------------".
-idtac " ".
-
-idtac "#> Manually graded: informal_not_PNP".
-idtac "Advanced".
-idtac "Possible points: 1".
-print_manual_grade manual_grade_for_informal_not_PNP.
 idtac " ".
 
 idtac "-------------------  de_morgan_not_or  --------------------".
@@ -362,8 +341,6 @@ idtac "  - A list of pending axioms, containing unproven assumptions. In this ca
 idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
-idtac "---------- and_exercise ---------".
-Print Assumptions and_exercise.
 idtac "---------- and_assoc ---------".
 Print Assumptions and_assoc.
 idtac "---------- mult_is_O ---------".
